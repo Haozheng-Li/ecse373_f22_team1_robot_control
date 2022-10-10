@@ -1,0 +1,4 @@
+<launch>
+  <arg name="namespace" default="robot0" />
+  <node name="stdr_driver_node" type="stdr_driver_node" pkg="stdr_driver_node" ns="$(arg namespace)" output="screen"/>
+</launch>
