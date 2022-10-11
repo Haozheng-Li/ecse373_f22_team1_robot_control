@@ -16,7 +16,7 @@ void desiredVelCallback(const geometry_msgs::Twist::ConstPtr& msg)
 {
   manual_control = true;
   cmd_vel = *msg;
-  ROS_INFO("Forward velocity %2.2f; Angular velocity %2.2f", msg->linear.x, msg->angular.z);
+  ROS_INFO("Manaul Command:Forward velocity %2.2f; Angular velocity %2.2f", msg->linear.x, msg->angular.z);
 }
 
 void laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
@@ -59,13 +59,8 @@ int main(int argc, char **argv)
   ros::Rate loop_rate(10);
 
   float min_distance = 0.5;
-  float detect_angle = 70;
+  float detect_angle = 80;
   bool almost_hit = false;
-
-  // Main logic
-  while (ros::ok())
-  {
-    almost_hit = false;
 
     // Velocity initial
     cmd_vel.linear.x = 0.1;
@@ -75,8 +70,12 @@ int main(int argc, char **argv)
     cmd_vel.angular.y = 0;
     cmd_vel.angular.z = 0;
 
-    int range_length = ceil((laser_data.angle_max-laser_data.angle_min)/laser_data.angle_increment);
+  // Main logic
+  while (ros::ok())
+  {
+    almost_hit = false;
 
+    int range_length = ceil((laser_data.angle_max-laser_data.angle_min)/laser_data.angle_increment);
     /*  Hit Judgement 
         Default scan angle from -135 to 135(-2.35 to 2.35)
         we only care about the -70 to 70(face front)
@@ -93,24 +92,34 @@ int main(int argc, char **argv)
       }
     }
 
-    if (almost_hit)
-    {
-      cmd_vel.linear.x = 0;
-      cmd_vel.angular.z = 0.2;
-      ROS_INFO("ALMOST HIT, START TURNING");
+    if (range_length>0)
+      {
+      if (almost_hit)
+      {
+        cmd_vel.linear.x = 0;
+        cmd_vel.angular.z = 0.2;
+        ROS_ERROR("AUTO CONTROL:ALMOST HIT, START TURNING");
 
-      manual_control=false; // When the robot get too close to the wall, switch to auto control
-    }
-    else{
-      if (!manual_control){
-        cmd_vel.linear.x = 0.1;
-        cmd_vel.angular.z = 0;
+        manual_control=false; // When the robot get too close to the wall, switch to auto control
+      }
+      else{
+        if (!manual_control){
+          cmd_vel.linear.x = 0.1;
+          cmd_vel.angular.z = 0;
+          ROS_INFO("AUTO CONTROL:HAVE ENOUGH DISTANCE, CONTINUE TO MOVE");
+        }
+        else{
+          ROS_INFO("MAUNUAL CONTROL");
+        }
+        
       }
 
-      ROS_INFO("HAVE ENOUGH DISTANCE, CONTINUE TO MOVE");
+      cmd_vel_pub.publish(cmd_vel);
+    }
+    else{
+      ROS_WARN("PLEASE SET UP YOU ROBOT");
     }
 
-    cmd_vel_pub.publish(cmd_vel);
 
     ros::spinOnce();
 
