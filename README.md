@@ -8,4 +8,4 @@ To start the project, go to the root path and type command:
 
 If you want to use the GUI of STDR simulator:
 
-`roslaunch stdr_driver_node stdr_driver_node.launch`
+`roslaunch stdr_driver_node stdr_driver_node_stdr.launch`
