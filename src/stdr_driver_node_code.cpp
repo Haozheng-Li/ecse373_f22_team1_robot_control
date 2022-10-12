@@ -42,7 +42,6 @@ void laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
 
 int main(int argc, char **argv)
 {
-
   ros::init(argc, argv, "stdr_driver_node");
 
   // Init the node
@@ -62,13 +61,13 @@ int main(int argc, char **argv)
   float detect_angle = 80;
   bool almost_hit = false;
 
-    // Velocity initial
-    cmd_vel.linear.x = 0.1;
-    cmd_vel.linear.y = 0;
-    cmd_vel.linear.z = 0;
-    cmd_vel.angular.x = 0;
-    cmd_vel.angular.y = 0;
-    cmd_vel.angular.z = 0;
+  // Velocity initial
+  cmd_vel.linear.x = 0.1;
+  cmd_vel.linear.y = 0;
+  cmd_vel.linear.z = 0;
+  cmd_vel.angular.x = 0;
+  cmd_vel.angular.y = 0;
+  cmd_vel.angular.z = 0;
 
   // Main logic
   while (ros::ok())
@@ -92,10 +91,9 @@ int main(int argc, char **argv)
       }
     }
 
-    if (range_length>0)
-      {
-      if (almost_hit)
-      {
+    // If the raser detect the data, or if robot is ready set up
+    if (range_length>0){
+      if (almost_hit){
         cmd_vel.linear.x = 0;
         cmd_vel.angular.z = 0.2;
         ROS_ERROR("AUTO CONTROL:ALMOST HIT, START TURNING");
@@ -111,15 +109,12 @@ int main(int argc, char **argv)
         else{
           ROS_INFO("MAUNUAL CONTROL");
         }
-        
       }
-
       cmd_vel_pub.publish(cmd_vel);
     }
     else{
       ROS_WARN("PLEASE SET UP YOU ROBOT");
     }
-
 
     ros::spinOnce();
 
